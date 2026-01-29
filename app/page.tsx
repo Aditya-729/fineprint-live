@@ -72,7 +72,7 @@ export default function HomePage() {
         <input
           id="url"
           type="url"
-          placeholder="https://www.canva.com/pricing (enter a URL to check pricing)"
+          placeholder="https://example.com/pricing (enter a URL to check pricing)"
           value={url}
           onChange={(event) => setUrl(event.target.value)}
         />

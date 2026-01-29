@@ -3,7 +3,13 @@ import { callMino } from "../../../lib/mino";
 import { analyzePolicies } from "../../../lib/rules";
 import { buildExplanations } from "../../../lib/explain";
 
-const errorResponse = (flags: string[]) => {
+type ApiResponse = {
+  verdict: "good" | "caution" | "risk" | "unclear";
+  flags: string[];
+  explanations: string[];
+};
+
+const errorResponse = (flags: string[]): ApiResponse => {
   return {
     verdict: "unclear" as const,
     flags,
@@ -21,7 +27,7 @@ const isValidUrl = (value: string) => {
 };
 
 export async function POST(request: Request) {
-  let response = errorResponse(["analysis_failed"]);
+  let response: ApiResponse = errorResponse(["analysis_failed"]);
   try {
     let body: { url?: string } = {};
     try {

@@ -1,6 +1,7 @@
 import chromium from "@sparticuz/chromium";
 import * as cheerio from "cheerio";
 import puppeteer from "puppeteer-core";
+import type { Browser } from "puppeteer-core";
 import { normalizeText, type MinoPayload, type PolicyPage } from "./extract";
 
 type ProgressReporter = (message: string) => void;
@@ -79,7 +80,7 @@ const launchBrowser = async () => {
   });
 };
 
-const fetchHtmlWithBrowser = async (browser: puppeteer.Browser, url: string) => {
+const fetchHtmlWithBrowser = async (browser: Browser, url: string) => {
   const page = await browser.newPage();
   try {
     await page.setUserAgent(USER_AGENT);

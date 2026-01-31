@@ -12,7 +12,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@sparticuz/chromium": "^143.0.4",
+    "cheerio": "^1.2.0",
     "next": "^16.1.6",
+    "puppeteer-core": "^24.36.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },

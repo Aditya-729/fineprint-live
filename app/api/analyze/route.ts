@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { extractWithBrowser } from "../../../lib/headless";
 import { callMino } from "../../../lib/mino";
 import { analyzePolicies } from "../../../lib/rules";
 import { buildExplanations } from "../../../lib/explain";
+import type { MinoPayload } from "../../../lib/extract";
 
 type ApiResponse = {
   verdict: "good" | "caution" | "risk" | "unclear";
@@ -43,7 +45,12 @@ export async function POST(request: Request) {
       return NextResponse.json(response);
     }
 
-    const minoPayload = await callMino(url);
+    let minoPayload: MinoPayload;
+    try {
+      minoPayload = await callMino(url);
+    } catch {
+      minoPayload = await extractWithBrowser(url);
+    }
     const analysis = analyzePolicies(
       minoPayload.productText,
       minoPayload.policyPages,

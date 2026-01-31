@@ -1,5 +1,6 @@
 import { buildExplanations } from "../../../lib/explain";
 import { normalizeText, type MinoPayload } from "../../../lib/extract";
+import { extractWithBrowser } from "../../../lib/headless";
 import { callMino } from "../../../lib/mino";
 import { analyzePolicies } from "../../../lib/rules";
 
@@ -79,8 +80,10 @@ const streamAnalyze = async (request: Request) => {
         controller.enqueue(encoder.encode(payload));
       };
 
-      const sendActivity = (message: string) => send("activity", { message } satisfies ActivityPayload);
-      const sendLongStep = (title: string) => send("long-step", { title } satisfies LongStepPayload);
+      const sendActivity = (message: string) =>
+        send("activity", { message } satisfies ActivityPayload);
+      const sendLongStep = (title: string) =>
+        send("long-step", { title } satisfies LongStepPayload);
 
       const endStream = (data: ApiResponse) => {
         send("done", data);
@@ -107,19 +110,30 @@ const streamAnalyze = async (request: Request) => {
           return;
         }
 
-        sendActivity("Fetching main terms page");
-        sendActivity("Discovering linked policy pages");
+        const withHeartbeat = async <T,>(title: string, task: () => Promise<T>) => {
+          sendLongStep(title);
+          const heartbeat = setInterval(() => {
+            sendActivity(`Still working on: ${title}…`);
+          }, 2000);
+          try {
+            return await task();
+          } finally {
+            clearInterval(heartbeat);
+          }
+        };
 
-        const longStepTitle = "Reading policy pages";
-        sendLongStep(longStepTitle);
         let minoPayload: MinoPayload;
-        const heartbeat = setInterval(() => {
-          sendActivity(`Still working on: ${longStepTitle}…`);
-        }, 2000);
         try {
-          minoPayload = await callMino(url);
-        } finally {
-          clearInterval(heartbeat);
+          sendActivity("Fetching main terms page");
+          sendActivity("Discovering linked policy pages");
+          minoPayload = await withHeartbeat("Reading policy pages", () =>
+            callMino(url),
+          );
+        } catch {
+          sendActivity("Switching to browser extraction");
+          minoPayload = await withHeartbeat("Reading documents", () =>
+            extractWithBrowser(url, sendActivity),
+          );
         }
 
         sendActivity("Extracting visible text");

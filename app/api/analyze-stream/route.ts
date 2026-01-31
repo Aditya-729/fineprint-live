@@ -129,11 +129,17 @@ const streamAnalyze = async (request: Request) => {
           minoPayload = await withHeartbeat("Reading policy pages", () =>
             callMino(url),
           );
-        } catch {
+        } catch (error) {
+          console.error("Mino extraction failed", error);
           sendActivity("Switching to browser extraction");
-          minoPayload = await withHeartbeat("Reading documents", () =>
-            extractWithBrowser(url, sendActivity),
-          );
+          try {
+            minoPayload = await withHeartbeat("Reading documents", () =>
+              extractWithBrowser(url, sendActivity),
+            );
+          } catch (fallbackError) {
+            console.error("Browser extraction failed", fallbackError);
+            throw fallbackError;
+          }
         }
 
         sendActivity("Extracting visible text");

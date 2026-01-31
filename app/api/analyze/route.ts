@@ -48,8 +48,14 @@ export async function POST(request: Request) {
     let minoPayload: MinoPayload;
     try {
       minoPayload = await callMino(url);
-    } catch {
-      minoPayload = await extractWithBrowser(url);
+    } catch (error) {
+      console.error("Mino extraction failed", error);
+      try {
+        minoPayload = await extractWithBrowser(url);
+      } catch (fallbackError) {
+        console.error("Browser extraction failed", fallbackError);
+        throw fallbackError;
+      }
     }
     const analysis = analyzePolicies(
       minoPayload.productText,

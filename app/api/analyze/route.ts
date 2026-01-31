@@ -39,8 +39,10 @@ export async function POST(request: Request) {
       return NextResponse.json(response);
     }
     const url = typeof body.url === "string" ? body.url.trim() : "";
+    console.log("Analyze request", { url });
 
     if (!url || !isValidUrl(url)) {
+      console.warn("Analyze invalid URL", { url });
       response = errorResponse(["invalid_url"]);
       return NextResponse.json(response);
     }
@@ -68,7 +70,8 @@ export async function POST(request: Request) {
       flags: analysis.flags,
       explanations,
     };
-  } catch {
+  } catch (error) {
+    console.error("Analyze failed", error);
     response = errorResponse(["analysis_failed"]);
   }
   return NextResponse.json(response);

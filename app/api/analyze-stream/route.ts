@@ -105,7 +105,9 @@ const streamAnalyze = async (request: Request) => {
       try {
         sendActivity("Validating input URL");
         const url = await parseRequestUrl(request);
+        console.log("Analyze stream request", { url });
         if (!url || !isValidUrl(url)) {
+          console.warn("Analyze stream invalid URL", { url });
           endStream(errorResponse(["invalid_url"]));
           return;
         }
@@ -172,7 +174,8 @@ const streamAnalyze = async (request: Request) => {
           flags: analysis.flags,
           explanations,
         });
-      } catch {
+      } catch (error) {
+        console.error("Analyze stream failed", error);
         endStream(errorResponse(["analysis_failed"]));
       } finally {
         request.signal.removeEventListener("abort", abortHandler);

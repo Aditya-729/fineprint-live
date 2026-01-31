@@ -73,7 +73,7 @@ const launchBrowser = async () => {
 
   return puppeteer.launch({
     args: chromium.args,
-    defaultViewport: chromium.defaultViewport,
+    defaultViewport: { width: 1280, height: 720 },
     executablePath,
     headless: chromium.headless,
   });
